@@ -34,12 +34,8 @@ namespace NM_asm_Language
             if (_disposed)
                 throw new ObjectDisposedException("NMCompletionSource");
 
-            List<Completion> completions = new List<Completion>()
-           /* {
-                new Completion("Ook!"),
-                new Completion("Ook."),
-                new Completion("Ook?")
-            }*/;
+            List<Completion> completions = new List<Completion>();
+            
             foreach (var el in NM_asm_Language.Dictionary_asm.Keywords)
             {
                 completions.Add(new Completion(el));

@@ -62,6 +62,9 @@
             _NM_Types[NM_TokenTypes.NM_directive] = typeService.GetClassificationType("nm_asm_directive");
             _NM_Types[NM_TokenTypes.NM_label] = typeService.GetClassificationType("nm_asm_label");
             _NM_Types[NM_TokenTypes.NM_data_registers] = typeService.GetClassificationType("nm_asm_data_registers");
+            _NM_Types[NM_TokenTypes.NM_comment] = typeService.GetClassificationType("nm_asm_comment");
+            _NM_Types[NM_TokenTypes.NM_quote] = typeService.GetClassificationType("nm_asm_quote");
+            _NM_Types[NM_TokenTypes.NM_number] = typeService.GetClassificationType("nm_asm_number");
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged
@@ -78,13 +81,9 @@
             foreach (var tagSpan in _aggregator.GetTags(spans))
             {
                 var tagSpans = tagSpan.Span.GetSpans(spans[0].Snapshot);
-
-                var tt = _NM_Types[tagSpan.Tag.type];
-                var d = new ClassificationTag(_NM_Types[tagSpan.Tag.type]);
-
                 yield return 
-                    new TagSpan<ClassificationTag>(tagSpans[0], 
-                                                   d);
+                    new TagSpan<ClassificationTag>(tagSpans[0],
+                                                   new ClassificationTag(_NM_Types[tagSpan.Tag.type]));
             }
         }
     }

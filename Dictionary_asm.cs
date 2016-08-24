@@ -1,18 +1,12 @@
-﻿namespace NM_asm_Language
+﻿using System.Collections.Generic;
+
+namespace NM_asm_Language
 {
     class Dictionary_asm
     {
-        public void GetDictionary(string[] Keywords, string[] Directives, string[] Labels, string[] Data_registers)
-        {
-          /*  Keywords = this.Keywords;
-            Directives = this.Directives;
-            Labels = this.Labels;
-            Data_registers = this.Data_registers;*/
-        }
-
         #region Keywords
-        public static string[] Keywords = new string[]
-       {
+        public static List<string> Keywords = new List<string>(new string[]
+        {
             "activate",
             "addr",
             "and",
@@ -70,22 +64,22 @@
             "wait",
             "set",
             "or"
-       };
+        });
         #endregion
 
         #region Directives 
-        public static string[] Directives = new string[]
+        public static List<string> Directives = new List<string>(new string[]
         {
             ".align",
             ".branch",
             ".wait",
             ".repeat",
             ".endrepeat"
-        };
+        });
         #endregion
 
         #region Labels 
-        public static string[] Labels = new string[]
+        public static List<string> Labels = new List<string>(new string[]
         {
             "begin",
             "local",
@@ -99,11 +93,11 @@
             "extern",
             "word",
             "long"
-        };
+        });
         #endregion
 
         #region Data_registers 
-        public static string[] Data_registers = new string[]
+        public static List<string> Data_registers = new List<string>(new string[]
         {
             "ar0",
             "ar1",
@@ -160,7 +154,7 @@
             "afifo",
             "data",
             "ram"
-        };
+        });
         #endregion
 
         #region Auxiliary_symbols 
@@ -175,10 +169,9 @@
             '[',
             ']',
             '*',
-            '/',
-            '=',
-            ':'
+            '='
         };
+
         public static string RemoveAux(string src, ref int start, ref int finish)
         {
             string dst = src;
@@ -202,11 +195,76 @@
                     break;
                 }
             }
-
-
             dst = dst.Trim();
             return dst;
+        }
 
+        public static bool IsComment(string src)
+        {
+            if (src.Length < 2)
+            {
+                return false;
+            }
+            else if (src[0] == '/' && src[1] == '/')
+            {
+                return true;
+            }
+            
+            return false;
+        }
+
+        public static bool IsQuoted(string src)
+        {
+            if (src.Length < 2)
+            {
+                return false;
+            }
+            else if (src[0] == '"' && src[src.Length - 1] == '"')
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsNumber(string src)
+        { 
+            long number = 0;
+            bool res = long.TryParse(src, out number);
+            if (res)
+                return true;
+
+            if (src.Length < 2)
+                return false;
+
+            string tmp = src.Substring(src.Length - 1);
+            if (tmp.ToLower() == "h")
+            {
+                res = long.TryParse(src.Substring(0, src.Length - 1), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out number);
+            }
+            if (res)
+                return true;
+
+            if (src.Length < 3)
+                return false;
+
+            tmp = src.Substring(src.Length - 2);
+            if (tmp.ToLower() == "hl")
+            {
+                res = long.TryParse(src.Substring(0, src.Length - 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out number);
+            }
+            if (res)
+                return true;
+
+            tmp = src.Substring(0, 2);
+            if (tmp.ToLower() == "0x")
+            {
+                res = long.TryParse(src.Substring(2, src.Length - 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out number);
+            }
+            if (res)
+                return true;
+
+            return false;
         }
         #endregion
     }

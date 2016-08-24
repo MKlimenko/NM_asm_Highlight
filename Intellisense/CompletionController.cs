@@ -60,6 +60,8 @@ namespace NM_asm_Language
             return (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
         }
 
+        private bool prev_space = true;
+
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
             bool handled = false;
@@ -80,6 +82,9 @@ namespace NM_asm_Language
                     case VSConstants.VSStd2KCmdID.TAB:
                         handled = Complete(true);
                         break;
+                    case VSConstants.VSStd2KCmdID.SPACEDOWN:
+                        handled = Cancel();
+                        break;
                     case VSConstants.VSStd2KCmdID.CANCEL:
                         handled = Cancel();
                         break;
@@ -97,10 +102,32 @@ namespace NM_asm_Language
                     {
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
                             char ch = GetTypeChar(pvaIn);
-                            if (ch == '.') //Starting the session on the first character.
-                                StartSession();
+                            if (ch == '.')
+                            { //Starting the session on the first character.
+                                if (prev_space)
+                                {
+                                    prev_space = false;
+                                    StartSession();
+                                }
+                            }
                             else if (ch >= 'a' && ch <= 'z')
-                                StartSession();
+                            {
+                                if (prev_space)
+                                {
+                                    prev_space = false;
+                                    StartSession();
+                                }
+                            }
+                            else if(ch >='0' && ch <= '9')
+                            {
+                                prev_space = false;
+                            }
+                            else if (ch == ' ')
+                            {
+                                prev_space = true;
+                                Cancel();
+                                break;
+                            }
                             else if (_currentSession != null)
                                 Filter();
                             break;

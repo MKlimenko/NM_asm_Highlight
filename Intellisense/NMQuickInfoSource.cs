@@ -62,6 +62,7 @@ namespace NM_asm_Language
 
             foreach (IMappingTagSpan<NM_TokenTag> curTag in _aggregator.GetTags(new SnapshotSpan(triggerPoint, triggerPoint)))
             {
+                //Add quick info!
                /* if (curTag.Tag.type == NM_TokenTypes.OokExclamation)
                 {
                     var tagSpan = curTag.Span.GetSpans(_buffer).First();
