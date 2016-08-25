@@ -64,6 +64,7 @@
             _NM_Types["Comment"] = NM_TokenTypes.NM_comment;
             _NM_Types["Quote"] = NM_TokenTypes.NM_quote;
             _NM_Types["Number"] = NM_TokenTypes.NM_number;
+            _NM_Types["Custom_label"] = NM_TokenTypes.NM_custom_label;
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged
@@ -79,44 +80,45 @@
             {
                 ITextSnapshotLine containingLine = curSpan.Start.GetContainingLine();
                 int curLoc = containingLine.Start.Position;
-                int temp_start = 0;
+                int start_span = 0;
                 int temp_finish = 0;
-                var containing_edited = Dictionary_asm.RemoveAux(containingLine.GetText().ToLower(), ref temp_start, ref temp_finish);
+                var containing_edited = Dictionary_asm.RemoveAux(containingLine.GetText().ToLower(), ref start_span, ref temp_finish);
                 string[] tokens = containing_edited.Split(' ');
 
                 foreach (string nm_Token in tokens)
                 {
-                    //int start = 0;
-                    // int finish = 0;
-                    // string temp_token = Dictionary_asm.RemoveAux(nm_Token, ref start, ref finish);
                     var temp_token = nm_Token;
                     if (_NM_Types.ContainsKey(temp_token))
                     {
-                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + temp_start, nm_Token.Length));
+                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, nm_Token.Length));
                         if( tokenSpan.IntersectsWith(curSpan) ) 
                             yield return new TagSpan<NM_TokenTag>(tokenSpan, 
                                                                   new NM_TokenTag(_NM_Types[temp_token]));
                     }
-                    //!!!
-                    // Prev address : C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe
-                    //!!!
                     else if (Dictionary_asm.IsQuoted(temp_token))
                     {
-                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + temp_start, nm_Token.Length));
+                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, nm_Token.Length));
                         if (tokenSpan.IntersectsWith(curSpan))
                             yield return new TagSpan<NM_TokenTag>(tokenSpan,
                                                                   new NM_TokenTag(_NM_Types["Quote"]));
                     }
                     else if (Dictionary_asm.IsNumber(temp_token))
                     {
-                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + temp_start, nm_Token.Length));
+                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, nm_Token.Length));
                         if (tokenSpan.IntersectsWith(curSpan))
                             yield return new TagSpan<NM_TokenTag>(tokenSpan,
                                                                   new NM_TokenTag(_NM_Types["Number"]));
                     }
+                    else if (Dictionary_asm.IsCustomLabel(ref temp_token))
+                    {
+                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, nm_Token.Length));
+                        if (tokenSpan.IntersectsWith(curSpan))
+                            yield return new TagSpan<NM_TokenTag>(tokenSpan,
+                                                                  new NM_TokenTag(_NM_Types["Custom_label"]));
+                    }
                     else if (Dictionary_asm.IsComment(nm_Token))
                     {
-                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + temp_start, containingLine.Length));
+                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, containingLine.Length));
                         if (tokenSpan.IntersectsWith(curSpan))
                             yield return new TagSpan<NM_TokenTag>(tokenSpan,
                                                                   new NM_TokenTag(_NM_Types["Comment"]));

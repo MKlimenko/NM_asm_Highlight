@@ -24,7 +24,7 @@ namespace NM_asm_Language
         public NM_asm_Keyword()
         {
             DisplayName = "NM asm Keyword"; //human readable version of the name
-            ForegroundColor = Colors.Blue;
+            ForegroundColor = (Color)ColorConverter.ConvertFromString("#3e3ef1");
         }
     }
 
@@ -46,7 +46,7 @@ namespace NM_asm_Language
         public NM_asm_Directive()
         {
             DisplayName = "NM asm Directive"; //human readable version of the name
-            ForegroundColor = Colors.DarkCyan;
+            ForegroundColor = (Color)ColorConverter.ConvertFromString("#2b91af");
         }
     }
 
@@ -68,7 +68,7 @@ namespace NM_asm_Language
         public NM_asm_Label()
         {
             DisplayName = " NM asm Label"; //human readable version of the name
-            ForegroundColor = Colors.Coral;
+            ForegroundColor = (Color)ColorConverter.ConvertFromString("#b514e3");
         }
     }
 
@@ -90,7 +90,7 @@ namespace NM_asm_Language
         public NM_asm_Data_registers()
         {
             DisplayName = "NM asm Data Registers"; //human readable version of the name
-            ForegroundColor = Colors.DarkGreen;
+            ForegroundColor = Colors.DarkCyan;
         }
     }
 
@@ -112,7 +112,7 @@ namespace NM_asm_Language
         public NM_asm_Comment()
         {
             DisplayName = "NM asm Comment"; //human readable version of the name
-            ForegroundColor = Colors.Green;
+            ForegroundColor = (Color)ColorConverter.ConvertFromString("#006400");
         }
     }
 
@@ -134,7 +134,7 @@ namespace NM_asm_Language
         public NM_asm_Quote()
         {
             DisplayName = "NM asm Quote"; //human readable version of the name
-            ForegroundColor = Colors.Red;
+            ForegroundColor = (Color)ColorConverter.ConvertFromString("#a31515");
         }
     }
 
@@ -156,7 +156,30 @@ namespace NM_asm_Language
         public NM_asm_Number()
         {
             DisplayName = "NM asm Number"; //human readable version of the name
-            ForegroundColor = Colors.DarkGray;
+            ForegroundColor = (Color)ColorConverter.ConvertFromString("#2f4f4f");
+        }
+    }
+
+    /// <summary>
+    /// Defines the editor format for the ookPeriod classification type. Text is colored Orange
+    /// </summary>
+    [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = "nm_asm_custom_label")]
+    [Name("nm_asm_custom_label")]
+    //this should be visible to the end user
+    [UserVisible(false)]
+    //set the priority to be after the default classifiers
+    [Order(Before = Priority.Default)]
+    internal sealed class NM_asm_Custom_Label: ClassificationFormatDefinition
+    {
+        /// <summary>
+        /// Defines the visual format for the "period" classification type
+        /// </summary>
+        public NM_asm_Custom_Label()
+        {
+            DisplayName = "NM asm custom label"; //human readable version of the name
+         //   ForegroundColor = Colors.DarkRed; 
+            ForegroundColor = (Color)ColorConverter.ConvertFromString("#d52828");
         }
     }
     #endregion //Format definition

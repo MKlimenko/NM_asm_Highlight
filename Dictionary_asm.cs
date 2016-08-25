@@ -91,8 +91,6 @@ namespace NM_asm_Language
             "label",
             "macro",
             "extern",
-            "word",
-            "long"
         });
         #endregion
 
@@ -153,7 +151,9 @@ namespace NM_asm_Language
             "wfifo",
             "afifo",
             "data",
-            "ram"
+            "ram",
+            "word",
+            "long"
         });
         #endregion
 
@@ -171,7 +171,9 @@ namespace NM_asm_Language
             '*',
             '='
         };
+        #endregion
 
+        #region assisting_methods
         public static string RemoveAux(string src, ref int start, ref int finish)
         {
             string dst = src;
@@ -264,6 +266,19 @@ namespace NM_asm_Language
             if (res)
                 return true;
 
+            return false;
+        }
+
+        public static bool IsCustomLabel(ref string src)
+        {
+            if (src.Length <= 2)
+            {
+                return false;
+            }
+            if(src[0] == '<' && src[src.Length-1] == '>')
+            {
+                return true;
+            }
             return false;
         }
         #endregion

@@ -77,6 +77,7 @@ namespace NM_asm_Language
                         handled = StartSession();
                         break;
                     case VSConstants.VSStd2KCmdID.RETURN:
+                        prev_space = true;
                         handled = Complete(false);
                         break;
                     case VSConstants.VSStd2KCmdID.TAB:
@@ -118,7 +119,7 @@ namespace NM_asm_Language
                                     StartSession();
                                 }
                             }
-                            else if(ch >='0' && ch <= '9')
+                            else if (ch >= '0' && ch <= '9')
                             {
                                 prev_space = false;
                             }
@@ -129,7 +130,9 @@ namespace NM_asm_Language
                                 break;
                             }
                             else if (_currentSession != null)
+                            {
                                 Filter();
+                            }
                             break;
                         case VSConstants.VSStd2KCmdID.BACKSPACE:
                             Filter();

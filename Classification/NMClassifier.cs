@@ -65,6 +65,7 @@
             _NM_Types[NM_TokenTypes.NM_comment] = typeService.GetClassificationType("nm_asm_comment");
             _NM_Types[NM_TokenTypes.NM_quote] = typeService.GetClassificationType("nm_asm_quote");
             _NM_Types[NM_TokenTypes.NM_number] = typeService.GetClassificationType("nm_asm_number");
+            _NM_Types[NM_TokenTypes.NM_custom_label] = typeService.GetClassificationType("nm_asm_custom_label");
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged

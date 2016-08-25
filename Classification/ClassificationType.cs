@@ -56,6 +56,13 @@ namespace NM_asm_Language
         [Export(typeof(ClassificationTypeDefinition))]
         [Name("nm_asm_number")]
         internal static ClassificationTypeDefinition NM_asm_Number = null;
+
+        /// <summary>
+        /// Defines the "ookPeriod" classification type.
+        /// </summary>
+        [Export(typeof(ClassificationTypeDefinition))]
+        [Name("nm_asm_custom_label")]
+        internal static ClassificationTypeDefinition NM_asm_Custom_Label = null;
         #endregion
     }
 }
