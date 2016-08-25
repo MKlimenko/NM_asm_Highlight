@@ -11,9 +11,9 @@
 //***************************************************************************-->
 <PackageManifest Version="2.0.0" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
   <Metadata>
-    <Identity Id="c729d6b2-f512-49ed-893d-a8f61f25db99" Version="1.1" Language="en-US" Publisher="Microsoft" />
-    <DisplayName>NM_asm_Language</DisplayName>
-    <Description xml:space="preserve">Sample classifier extension to the Visual Studio Editor. Implements the 'Ook' language</Description>
+    <Identity Id="eedb1085-e09d-4934-a0ab-77262b6b19c6" Version="0.1" Language="en-US" Publisher="RC Module" />
+    <DisplayName>NeuroMatrix assembly language</DisplayName>
+    <Description xml:space="preserve">NeuroMatrix assembly language syntax highlight and statement completion</Description>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="14.0" />
