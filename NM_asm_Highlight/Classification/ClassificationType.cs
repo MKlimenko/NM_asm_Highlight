@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
-namespace NM_asm_Language
+namespace NM_asm_highlight
 {
     internal static class OrdinaryClassificationDefinition
     {

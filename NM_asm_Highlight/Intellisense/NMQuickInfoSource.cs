@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Utilities;
 
-namespace NM_asm_Language
+namespace NM_asm_highlight
 {
     /// <summary>
     /// Factory for quick info sources
@@ -53,7 +53,7 @@ namespace NM_asm_Language
             applicableToSpan = null;
 
             if (_disposed)
-                throw new ObjectDisposedException("TestQuickInfoSource");
+                throw new ObjectDisposedException("QuickInfoSource");
 
             var triggerPoint = (SnapshotPoint) session.GetTriggerPoint(_buffer.CurrentSnapshot);
 
@@ -62,25 +62,13 @@ namespace NM_asm_Language
 
             foreach (IMappingTagSpan<NM_TokenTag> curTag in _aggregator.GetTags(new SnapshotSpan(triggerPoint, triggerPoint)))
             {
-                //Add quick info!
-               /* if (curTag.Tag.type == NM_TokenTypes.OokExclamation)
+                if(curTag.Tag.type == NM_TokenTypes.NM_data_registers)
                 {
                     var tagSpan = curTag.Span.GetSpans(_buffer).First();
                     applicableToSpan = _buffer.CurrentSnapshot.CreateTrackingSpan(tagSpan, SpanTrackingMode.EdgeExclusive);
-                    quickInfoContent.Add("Exclaimed Ook!");
+                    quickInfoContent.Add("Data registers");
+
                 }
-                else if (curTag.Tag.type == NM_TokenTypes.OokQuestion)
-                {
-                    var tagSpan = curTag.Span.GetSpans(_buffer).First();
-                    applicableToSpan = _buffer.CurrentSnapshot.CreateTrackingSpan(tagSpan, SpanTrackingMode.EdgeExclusive);
-                    quickInfoContent.Add("Question Ook?");
-                }
-                else if (curTag.Tag.type == NM_TokenTypes.OokPeriod)
-                {
-                    var tagSpan = curTag.Span.GetSpans(_buffer).First();
-                    applicableToSpan = _buffer.CurrentSnapshot.CreateTrackingSpan(tagSpan, SpanTrackingMode.EdgeExclusive);
-                    quickInfoContent.Add("Regular Ook.");
-                }*/
             }
         }
 

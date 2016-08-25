@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Text;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Utilities;
 
-namespace NM_asm_Language
+namespace NM_asm_highlight
 {
     [Export(typeof(ICompletionSourceProvider))]
     [ContentType("nm_asm")]
@@ -36,22 +36,22 @@ namespace NM_asm_Language
 
             List<Completion> completions = new List<Completion>();
             
-            foreach (var el in NM_asm_Language.Dictionary_asm.Keywords)
+            foreach (var el in NM_asm_highlight.Dictionary_asm.Keywords)
             {
                 completions.Add(new Completion(el));
             }
 
-            foreach (var el in NM_asm_Language.Dictionary_asm.Directives)
+            foreach (var el in NM_asm_highlight.Dictionary_asm.Directives)
             {
                 completions.Add(new Completion(el));
             }
 
-            foreach (var el in NM_asm_Language.Dictionary_asm.Labels)
+            foreach (var el in NM_asm_highlight.Dictionary_asm.Labels)
             {
                 completions.Add(new Completion(el));
             }
 
-            foreach (var el in NM_asm_Language.Dictionary_asm.Data_registers)
+            foreach (var el in NM_asm_highlight.Dictionary_asm.Data_registers)
             {
                 completions.Add(new Completion(el));
             }

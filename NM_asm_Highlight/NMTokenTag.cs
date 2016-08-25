@@ -1,4 +1,4 @@
-﻿namespace NM_asm_Language
+﻿namespace NM_asm_highlight
 {
     using System;
     using System.Collections.Generic;
@@ -42,22 +42,22 @@
             _buffer = buffer;
             _NM_Types = new Dictionary<string, NM_TokenTypes>();
             
-            foreach (var el in NM_asm_Language.Dictionary_asm.Keywords)
+            foreach (var el in NM_asm_highlight.Dictionary_asm.Keywords)
             {
                 _NM_Types[el] = NM_TokenTypes.NM_Keyword;
             }
 
-            foreach (var el in NM_asm_Language.Dictionary_asm.Directives)
+            foreach (var el in NM_asm_highlight.Dictionary_asm.Directives)
             {
                 _NM_Types[el] = NM_TokenTypes.NM_directive;
             }
 
-            foreach (var el in NM_asm_Language.Dictionary_asm.Labels)
+            foreach (var el in NM_asm_highlight.Dictionary_asm.Labels)
             {
                 _NM_Types[el] = NM_TokenTypes.NM_label;
             }
 
-            foreach (var el in NM_asm_Language.Dictionary_asm.Data_registers)
+            foreach (var el in NM_asm_highlight.Dictionary_asm.Data_registers)
             {
                 _NM_Types[el] = NM_TokenTypes.NM_data_registers;
             }

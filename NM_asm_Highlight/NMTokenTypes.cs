@@ -1,4 +1,4 @@
-﻿namespace NM_asm_Language
+﻿namespace NM_asm_highlight
 {
     public enum NM_TokenTypes
     {

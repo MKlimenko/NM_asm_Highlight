@@ -37,8 +37,8 @@
     <ProjectGuid>{F091221E-FD10-41A7-AAC4-C9359178BDB1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NM_asm_Language</RootNamespace>
-    <AssemblyName>NM_asm_Language</AssemblyName>
+    <RootNamespace>NM_asm_highlight</RootNamespace>
+    <AssemblyName>NM_asm_Highlight</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
@@ -98,7 +98,6 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="test.ook" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">

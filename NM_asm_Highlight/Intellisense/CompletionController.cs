@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio;
 using System.Runtime.InteropServices;
 
-namespace NM_asm_Language
+namespace NM_asm_highlight
 {
     #region Command Filter
 

@@ -3,7 +3,7 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
-namespace NM_asm_Language
+namespace NM_asm_highlight
 {
     #region Format definition
     [Export(typeof(EditorFormatDefinition))]

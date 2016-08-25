@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NM_asm_Language
+namespace NM_asm_highlight
 {
     class Dictionary_asm
     {

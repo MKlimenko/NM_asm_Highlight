@@ -1,4 +1,4 @@
-﻿namespace NM_asm_Language
+﻿namespace NM_asm_highlight
 {
     using System;
     using System.Collections.Generic;
