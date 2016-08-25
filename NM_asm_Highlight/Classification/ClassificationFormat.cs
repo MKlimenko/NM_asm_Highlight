@@ -2,7 +2,6 @@
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
-using Microsoft.VisualStudio.PlatformUI;
 using System.Collections.Generic;
 using Microsoft.Win32;
 
@@ -88,7 +87,7 @@ namespace NM_asm_highlight
             }
             else
             {
-                ForegroundColor = (Color)ColorConverter.ConvertFromString("#3e3ef1");
+                ForegroundColor = (Color)ColorConverter.ConvertFromString("#1616ff");
             }
         }
     }
