@@ -1,7 +1,7 @@
 ﻿NM_asm_Highlight
 ======
 
-Подсветка кода ассемблера NeuroMatrix для Visual Studio 2015
+Подсветка кода ассемблера NeuroMatrix для Visual Studio 2013 (кроме Express) и Visual Studio 2015
 ___
 # Блоки
 

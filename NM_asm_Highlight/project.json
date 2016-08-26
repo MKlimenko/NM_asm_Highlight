@@ -3,8 +3,8 @@
     "net45": {}
   },
   "dependencies": {
-    "Microsoft.VisualStudio.Editor": "14.3.25407",
-    "Microsoft.VisualStudio.Language.Intellisense": "14.3.25407",
+    "Microsoft.VisualStudio.Editor": "12.0.21005",
+    "Microsoft.VisualStudio.Language.Intellisense": "12.0.21005",
     "Microsoft.VisualStudio.SDK.EmbedInteropTypes": "14.1.2",
     "Microsoft.VisualStudio.Shell.14.0": "14.3.25407",
     "Microsoft.VisualStudio.Shell.Interop.12.0": "12.0.30110",
