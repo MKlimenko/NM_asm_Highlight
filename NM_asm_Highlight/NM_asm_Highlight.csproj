@@ -94,6 +94,7 @@
     <Compile Include="Dictionary_asm.cs" />
     <Compile Include="Intellisense\CompletionController.cs" />
     <Compile Include="Intellisense\CompletionSource.cs" />
+    <Compile Include="Intellisense\Dictionary_QuickInfo.cs" />
     <Compile Include="Intellisense\NMQuickInfoSource.cs" />
     <Compile Include="NMTokenTag.cs" />
     <Compile Include="NMTokenTypes.cs" />

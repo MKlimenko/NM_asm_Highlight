@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Utilities;
+using System.Reflection;
 
 namespace NM_asm_highlight
 {
@@ -38,7 +39,6 @@ namespace NM_asm_highlight
         private ITextBuffer _buffer;
         private bool _disposed = false;
 
-
         public NMQuickInfoSource(ITextBuffer buffer, ITagAggregator<NM_TokenTag> aggregator)
         {
             _aggregator = aggregator;
@@ -65,8 +65,13 @@ namespace NM_asm_highlight
                 if(curTag.Tag.type == NM_TokenTypes.NM_data_registers)
                 {
                     var tagSpan = curTag.Span.GetSpans(_buffer).First();
-                    applicableToSpan = _buffer.CurrentSnapshot.CreateTrackingSpan(tagSpan, SpanTrackingMode.EdgeExclusive);
-                    quickInfoContent.Add("Data registers");
+                    string key = tagSpan.GetText().ToLower();
+                    var explanation = Dictionary_QuickInfo.GetDescription(key);
+                    if (explanation.Length > 0)
+                    {
+                        applicableToSpan = _buffer.CurrentSnapshot.CreateTrackingSpan(tagSpan, SpanTrackingMode.EdgeExclusive);
+                        quickInfoContent.Add(explanation);
+                    }
 
                 }
             }
