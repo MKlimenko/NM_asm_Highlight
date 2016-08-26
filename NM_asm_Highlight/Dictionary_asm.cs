@@ -184,7 +184,7 @@ namespace NM_asm_highlight
             start = 0; finish = 0;
             for (int i = 0; i < dst.Length; ++i)
             {
-                if (dst[i] != ' ')
+                if (dst[i] != ' ' && dst[i] != '\t')
                 {
                     start = i;
                     for (finish = start; finish < dst.Length; ++finish)
