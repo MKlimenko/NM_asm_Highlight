@@ -97,6 +97,8 @@
     <Compile Include="Intellisense\NMQuickInfoSource.cs" />
     <Compile Include="NMTokenTag.cs" />
     <Compile Include="NMTokenTypes.cs" />
+    <Compile Include="Outlining\NMOutliningTagger.cs" />
+    <Compile Include="Outlining\NMOutliningTaggerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classification\NMClassifier.cs" />
     <Compile Include="Intellisense\QuickInfoController.cs" />
