@@ -42,13 +42,13 @@ namespace NM_asm_highlight
 
         public static string GetThemeId()
         {
-            string[] vstypes = { "14.0" };
+            string[] vstypes = { "14.0" }; //14 and higher
+            //foreach (var el in vstypes)... //when VS2016(2017) will be released
             string keyName = string.Format(@"Software\Microsoft\VisualStudio\{0}\ApplicationPrivateSettings\Microsoft\VisualStudio", vstypes[0]);
-
 
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey(keyName))
             {
-                if (key != null)
+                if (key != null) //14 and higher
                 {
                     var keyText = (string)key.GetValue("ColorTheme", string.Empty);
 
@@ -59,6 +59,25 @@ namespace NM_asm_highlight
                         {
                             return keyTextValues[2];
                         }
+                    }
+                }
+                else
+                {
+                    keyName = string.Format(@"Software\Microsoft\VisualStudio\12.0\General");
+                    using (RegistryKey key_12 = Registry.CurrentUser.OpenSubKey(keyName))
+                    {
+                        if (key_12 != null)
+                        {
+                            string current_theme = (string)key_12.GetValue("CurrentTheme", string.Empty);
+                            if (!string.IsNullOrEmpty(current_theme))
+                            {
+                                if (current_theme.Length > 2)
+                                {
+                                    return current_theme.Substring(1, current_theme.Length - 2);
+                                }
+                            }
+                        }
+
                     }
                 }
             }
