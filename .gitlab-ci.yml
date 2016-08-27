@@ -1,0 +1,8 @@
+NM_asm_Highlight:
+ script:
+  - 'setlocal'
+  - 'chcp 65001'
+  - 'call "%VS140COMNTOOLS%..\..\vc\vcvarsall.bat"'
+  - 'msbuild.exe NM_asm_Highlight.sln /t:Rebuild /p:Configuration=Release /m'
+  - 'if not exist "%BUILDS%\NM_asm_Highlight" (mkdir "%BUILDS%\NM_asm_Highlight")'
+  - 'copy export\NM_asm_Highlight.vsix "%BUILDS%\NM_asm_Highlight"'

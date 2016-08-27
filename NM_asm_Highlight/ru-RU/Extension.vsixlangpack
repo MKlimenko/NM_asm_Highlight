@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<VsixLanguagePack Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema-lp/2010">
+  <LocalizedName>Подсветка синтаксиса ассемблера NeuroMatrix</LocalizedName>
+  <LocalizedDescription>Подсветка кода ассемблера NeuroMatrix для Visual Studio 2013 (кроме Express) и Visual Studio 2015</LocalizedDescription>
+  <License>License.txt</License>
+</VsixLanguagePack>
