@@ -44,33 +44,50 @@ namespace NM_asm_highlight
                  );
         }
 
+        private string GetExplanation(string key)
+        {
+            var explanation = Dictionary_QuickInfo.GetDescription(key.ToLower());
+            if (explanation.Length > 0)
+            {
+                return explanation;
+            }
+            return null;
+        }
+
         public void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
             if (_disposed)
                 throw new ObjectDisposedException("NMCompletionSource");
 
             List<Completion> completions = new List<Completion>();
+            List<Tuple<string, System.Windows.Media.ImageSource>> completion_with_icons = new List<Tuple<string, System.Windows.Media.ImageSource>> ();
 
             foreach (var el in NM_asm_highlight.Dictionary_asm.Keywords)
             {
-               completions.Add(new Completion(el, el, null, _icons[NM_TokenTypes.NM_Keyword], ""));
+                completion_with_icons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_Keyword]));
             }
 
             foreach (var el in NM_asm_highlight.Dictionary_asm.Directives)
             {
-                completions.Add(new Completion(el, el, null, _icons[NM_TokenTypes.NM_directive], ""));
+                completion_with_icons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_directive]));
             }
 
             foreach (var el in NM_asm_highlight.Dictionary_asm.Labels)
             {
-                completions.Add(new Completion(el, el, null, _icons[NM_TokenTypes.NM_label], ""));
+                completion_with_icons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_label]));
             }
 
             foreach (var el in NM_asm_highlight.Dictionary_asm.Data_registers)
             {
-                completions.Add(new Completion(el, el, null, _icons[NM_TokenTypes.NM_data_registers], ""));
+                completion_with_icons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_data_registers]));
             }
 
+            completion_with_icons.Sort();
+            foreach(var el in completion_with_icons)
+            {
+                completions.Add(new Completion(el.Item1, el.Item1, GetExplanation(el.Item1), el.Item2, ""));
+            }
+            
 
             ITextSnapshot snapshot = _buffer.CurrentSnapshot;
             var triggerPoint = (SnapshotPoint)session.GetTriggerPoint(snapshot);
@@ -113,7 +130,7 @@ namespace NM_asm_highlight
             }
         }
 
-        private static System.Windows.Media.ImageSource bitmapFromUri(Uri bitmapUri)
+        private System.Windows.Media.ImageSource bitmapFromUri(Uri bitmapUri)
         {
             var bitmap = new BitmapImage();
             try

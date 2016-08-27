@@ -138,7 +138,15 @@ namespace NM_asm_highlight
                             {
                                 Filter();
                                 prev_space = true;
+                                break;
                             }
+                        case VSConstants.VSStd2KCmdID.DELETE:
+                            {
+                                Filter();
+                                prev_space = true;
+                                break;
+                            }
+                        default:
                             break;
                     }
                 }

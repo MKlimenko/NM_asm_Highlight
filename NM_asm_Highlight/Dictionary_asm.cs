@@ -20,6 +20,7 @@ namespace NM_asm_highlight
             "common",
             "const",
             "ctrue",
+            "data",
             "delayed",
             "double",
             "dup",
@@ -150,7 +151,6 @@ namespace NM_asm_highlight
             "t1",
             "wfifo",
             "afifo",
-            "data",
             "ram",
             "word",
             "long"
