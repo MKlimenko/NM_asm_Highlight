@@ -135,7 +135,10 @@ namespace NM_asm_highlight
                             }
                             break;
                         case VSConstants.VSStd2KCmdID.BACKSPACE:
-                            Filter();
+                            {
+                                Filter();
+                                prev_space = true;
+                            }
                             break;
                     }
                 }
