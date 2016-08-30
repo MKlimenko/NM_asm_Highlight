@@ -44,6 +44,7 @@ namespace NM_asm_highlight
             "push",
             "ref",
             "rep",
+            "reserve",
             "return",
             "true",
             "shift",
@@ -163,14 +164,20 @@ namespace NM_asm_highlight
 
         private static readonly char[] auxiliary_symbols = new[]
         {
+            '(',
+            ')',
+            '<',
+            '>',
             ',',
             ';',
+            ':',
             '+',
             '-',
             '[',
             ']',
             '*',
-            '='
+            '=',
+            '\t'
         };
         #endregion
 
@@ -183,6 +190,20 @@ namespace NM_asm_highlight
                 dst = dst.Replace(el, ' ');
             }
             start = 0; finish = 0;
+
+
+            var multiple = dst.Trim().Split(' ');
+            if(multiple.Length == 1)
+            {
+                var tmp = src.Replace('\t', ' ').Trim();
+                if (tmp.Length > 2)
+                {
+                    if (tmp[0] == '<' && tmp[tmp.Length - 1] == '>')
+                    {
+                        return tmp; // check for label
+                    }
+                }
+            }
             for (int i = 0; i < dst.Length; ++i)
             {
                 if (dst[i] != ' ' && dst[i] != '\t')
@@ -271,13 +292,14 @@ namespace NM_asm_highlight
             return false;
         }
 
-        public static bool IsCustomLabel(ref string src)
+        public static bool IsCustomLabel(string src)
         {
-            if (src.Length <= 2)
+            var tmp = src.Replace('\t', ' ').Trim();
+            if (tmp.Length <= 2)
             {
                 return false;
             }
-            if(src[0] == '<' && src[src.Length-1] == '>')
+            if(tmp[0] == '<' && tmp[tmp.Length-1] == '>')
             {
                 return true;
             }
@@ -285,10 +307,16 @@ namespace NM_asm_highlight
         }
 
         public static List<string> Macros = new List<string>();
+        public static List<string> CustomLabel = new List<string>();
 
-        public static void AddMacro(string src_Line)
+        public static void AddCustomLine(string src_Line)
         {
-            var words = src_Line.Split(' ');
+            var words = src_Line.Split(new char[] { ' ', '\t' }, System.StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length == 0)
+            {
+                return;
+            }
+
             if (words[0].ToLower() == "macro")
             {
                 var getmacro = words[1].Replace('(', ' ').Split(' ');
@@ -297,6 +325,21 @@ namespace NM_asm_highlight
                     Macros.Add(getmacro[0].ToLower());
                 }
             }
+            //else if (words.Length == 1)
+            //{
+            //    var curr_label = words[0];
+            //    if (curr_label.Length > 2)
+            //    {
+            //        if (curr_label[0] == '<' && curr_label[curr_label.Length - 1] == '>')
+            //        {
+            //            curr_label = curr_label.Substring(1, curr_label.Length - 2).ToLower();
+            //            if (!CustomLabel.Contains(curr_label))
+            //            {
+            //                CustomLabel.Add(curr_label);
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         public static bool IsMacro(string src, out int size)

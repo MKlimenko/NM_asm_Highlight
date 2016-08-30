@@ -71,7 +71,6 @@
 
         public IEnumerable<ITagSpan<NM_TokenTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-
             foreach (SnapshotSpan curSpan in spans)
             {
                 ITextSnapshotLine containingLine = curSpan.Start.GetContainingLine();
@@ -81,7 +80,7 @@
                 var containing_edited = Dictionary_asm.RemoveAux(containingLine.GetText(), out start_span, out temp_finish);
                 string[] tokens = containing_edited.Split(' ');
 
-                Dictionary_asm.AddMacro(containingLine.GetText());
+                Dictionary_asm.AddCustomLine(containingLine.GetText());
                 foreach (string nm_Token in tokens)
                 {
                     var temp_token = nm_Token;
@@ -89,8 +88,8 @@
                     if (_NM_Types.ContainsKey(temp_token))
                     {
                         var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, nm_Token.Length));
-                        if( tokenSpan.IntersectsWith(curSpan) ) 
-                            yield return new TagSpan<NM_TokenTag>(tokenSpan, 
+                        if (tokenSpan.IntersectsWith(curSpan))
+                            yield return new TagSpan<NM_TokenTag>(tokenSpan,
                                                                   new NM_TokenTag(_NM_Types[temp_token]));
                     }
                     else if (Dictionary_asm.IsQuoted(temp_token))
@@ -107,7 +106,7 @@
                             yield return new TagSpan<NM_TokenTag>(tokenSpan,
                                                                   new NM_TokenTag(_NM_Types["Number"]));
                     }
-                    else if (Dictionary_asm.IsCustomLabel(ref temp_token))
+                    else if (Dictionary_asm.IsCustomLabel(containingLine.GetText()) || Dictionary_asm.CustomLabel.Contains(nm_Token.ToLower()))
                     {
                         var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, nm_Token.Length));
                         if (tokenSpan.IntersectsWith(curSpan))
@@ -130,12 +129,10 @@
                                                                   new NM_TokenTag(_NM_Types["Comment"]));
                         break;
                     }
-
                     //add an extra char location because of the space
                     curLoc += nm_Token.Length + 1;
                 }
             }
-            
         }
     }
 }

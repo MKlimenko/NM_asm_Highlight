@@ -123,7 +123,7 @@ namespace NM_asm_highlight
                 if (label_values.Length >= 2)
                 {
                     bool labelFound = Dictionary_asm.Labels.Contains(label_values[0]);
-                    if (labelFound && label_values[0]!= "global")
+                    if (labelFound && label_values[0] != "global" && label_values[0] != "local")
                     {
                         if (label_values[0] != "end")
                         {
@@ -144,7 +144,7 @@ namespace NM_asm_highlight
                 #region closing the region
                 if (regionFinished_comment || regionFinished_label)
                 {
-                    CloseRegion(newRegions, ref currentRegion, ref comment_started, line, linetext, LabelName_);
+                    CloseRegion(newRegions, ref currentRegion, ref comment_started, line, linetext, LabelName_, regionFinished_comment);
                     if(regionFinished_comment && regionFinished_label)
                     {
                         CloseRegion(newRegions, ref currentRegion, ref comment_started, line, linetext, LabelName_);
@@ -159,6 +159,11 @@ namespace NM_asm_highlight
                 }
                 #endregion
             }
+            if (comment_started)
+            {
+                CloseRegion(newRegions, ref currentRegion, ref comment_started, newSnapshot.Lines.Last(), newSnapshot.Lines.Last().GetText(), null);
+            }
+
 
             //determine the changed span, and send a changed event with the new spans
             List<Span> oldSpans =
@@ -249,7 +254,8 @@ namespace NM_asm_highlight
             return currentRegion;
         }
 
-        private static void CloseRegion(List<Region> newRegions, ref PartialRegion currentRegion, ref bool comment_started, ITextSnapshotLine line, string linetext, string LabelName_)
+        private static void CloseRegion(List<Region> newRegions, ref PartialRegion currentRegion, ref bool comment_started, ITextSnapshotLine line, string linetext, 
+            string LabelName_, bool closing_comment = false)
         {
             int currentLevel = (currentRegion != null) ? currentRegion.Level : 1;
             var currRegionStart = (currentRegion == null) ? -1 :
@@ -268,7 +274,7 @@ namespace NM_asm_highlight
                             Level = currentLevel,
                             StartLine = currentRegion.StartLine,
                             StartOffset = currentRegion.StartOffset,
-                            EndLine = line.LineNumber - (LabelName_.Length > 0 ? 0 : 1),
+                            EndLine = line.LineNumber - (closing_comment ? 1 : 0),
                             ellipsis = currentRegion.ellipsis,
                             LabelName = currentRegion.LabelName,
                             collapsed = currentRegion.collapsed
