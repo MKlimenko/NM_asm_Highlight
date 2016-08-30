@@ -4,8 +4,6 @@
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Classification;
-    using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
 
@@ -17,7 +15,7 @@
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            return new NM_TokenTagger(buffer) as ITagger<T>;
+            return new NM_TokenTagger() as ITagger<T>;
         }
     }
 
@@ -33,31 +31,28 @@
 
     internal sealed class NM_TokenTagger : ITagger<NM_TokenTag>
     {
-
-        ITextBuffer _buffer;
-        IDictionary<string, NM_TokenTypes> _NM_Types;
+        readonly IDictionary<string, NM_TokenTypes> _NM_Types;
         
-        internal NM_TokenTagger(ITextBuffer buffer)
+        internal NM_TokenTagger()
         {
-            _buffer = buffer;
             _NM_Types = new Dictionary<string, NM_TokenTypes>();
             
-            foreach (var el in NM_asm_highlight.Dictionary_asm.Keywords)
+            foreach (var el in Dictionary_asm.Keywords)
             {
                 _NM_Types[el] = NM_TokenTypes.NM_Keyword;
             }
 
-            foreach (var el in NM_asm_highlight.Dictionary_asm.Directives)
+            foreach (var el in Dictionary_asm.Directives)
             {
                 _NM_Types[el] = NM_TokenTypes.NM_directive;
             }
 
-            foreach (var el in NM_asm_highlight.Dictionary_asm.Labels)
+            foreach (var el in Dictionary_asm.Labels)
             {
                 _NM_Types[el] = NM_TokenTypes.NM_label;
             }
 
-            foreach (var el in NM_asm_highlight.Dictionary_asm.Data_registers)
+            foreach (var el in Dictionary_asm.Data_registers)
             {
                 _NM_Types[el] = NM_TokenTypes.NM_data_registers;
             }
@@ -65,6 +60,7 @@
             _NM_Types["Quote"] = NM_TokenTypes.NM_quote;
             _NM_Types["Number"] = NM_TokenTypes.NM_number;
             _NM_Types["Custom_label"] = NM_TokenTypes.NM_custom_label;
+            _NM_Types["Macro"] = NM_TokenTypes.NM_Macro;
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged
@@ -80,14 +76,16 @@
             {
                 ITextSnapshotLine containingLine = curSpan.Start.GetContainingLine();
                 int curLoc = containingLine.Start.Position;
-                int start_span = 0;
-                int temp_finish = 0;
-                var containing_edited = Dictionary_asm.RemoveAux(containingLine.GetText().ToLower(), ref start_span, ref temp_finish);
+                int start_span;
+                int temp_finish;
+                var containing_edited = Dictionary_asm.RemoveAux(containingLine.GetText(), out start_span, out temp_finish);
                 string[] tokens = containing_edited.Split(' ');
 
+                Dictionary_asm.AddMacro(containingLine.GetText());
                 foreach (string nm_Token in tokens)
                 {
                     var temp_token = nm_Token;
+                    int macro_size;
                     if (_NM_Types.ContainsKey(temp_token))
                     {
                         var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, nm_Token.Length));
@@ -116,9 +114,17 @@
                             yield return new TagSpan<NM_TokenTag>(tokenSpan,
                                                                   new NM_TokenTag(_NM_Types["Custom_label"]));
                     }
+                    else if (Dictionary_asm.IsMacro(nm_Token, out macro_size))
+                    {
+                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, macro_size));
+                        if (tokenSpan.IntersectsWith(curSpan))
+                            yield return new TagSpan<NM_TokenTag>(tokenSpan,
+                                                                  new NM_TokenTag(_NM_Types["Macro"]));
+                    }
+
                     else if (Dictionary_asm.IsComment(nm_Token))
                     {
-                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, containingLine.Length));
+                        var tokenSpan = new SnapshotSpan(curSpan.Snapshot, new Span(curLoc + start_span, containingLine.Length - containingLine.GetText().IndexOf(nm_Token)));
                         if (tokenSpan.IntersectsWith(curSpan))
                             yield return new TagSpan<NM_TokenTag>(tokenSpan,
                                                                   new NM_TokenTag(_NM_Types["Comment"]));

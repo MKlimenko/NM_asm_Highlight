@@ -2,9 +2,9 @@
 
 namespace NM_asm_highlight
 {
-    class Dictionary_QuickInfo
+    static class Dictionary_QuickInfo
     {
-        private static Dictionary<string, string> QuickInfoHints = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> QuickInfoHints = new Dictionary<string, string>()
         {
             {"ar0", "Адресный регистр ar0 (32 бита)"},
             {"ar1", "Адресный регистр ar1 (32 бита)"},

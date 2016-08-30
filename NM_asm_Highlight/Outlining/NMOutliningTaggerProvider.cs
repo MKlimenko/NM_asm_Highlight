@@ -13,8 +13,8 @@ namespace NM_asm_highlight
     {
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            Func<ITagger<T>> sc = delegate() { return new NMOutliningTagger(buffer) as ITagger<T>; };
-            return buffer.Properties.GetOrCreateSingletonProperty<ITagger<T>>(sc);
+            Func<ITagger<T>> sc = delegate { return new NMOutliningTagger(buffer) as ITagger<T>; };
+            return buffer.Properties.GetOrCreateSingletonProperty(sc);
         }     
     }
 

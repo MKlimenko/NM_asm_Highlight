@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.Text.Outlining;
-using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Tagging;
 
 namespace NM_asm_highlight
 {
@@ -14,11 +13,12 @@ namespace NM_asm_highlight
             public int StartLine { get; set; }
             public int StartOffset { get; set; }
             public int Level { get; set; }
+            public string LabelName { get; set; }
             public PartialRegion PartialParent { get; set; }
             public string ellipsis = "...";    //the characters that are displayed when the region is collapsed 
             //public string hover_text = ""; //the contents of the tooltip for the collapsed span  
             public string end_text = "";
-            public bool collapsed = false;
+            public bool collapsed;
         }
 
         class Region : PartialRegion
@@ -26,61 +26,62 @@ namespace NM_asm_highlight
             public int EndLine { get; set; }
         }
 
-        ITextBuffer buffer;
-        ITextSnapshot snapshot;
-        List<Region> regions;
+        readonly ITextBuffer _buffer;
+        ITextSnapshot _snapshot;
+        List<Region> _regions;
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
         public NMOutliningTagger(ITextBuffer buffer)
         {
-            this.buffer = buffer;
-            this.snapshot = buffer.CurrentSnapshot;
-            this.regions = new List<Region>();
-            this.ReParse();
-            this.buffer.Changed += BufferChanged; //use the same mechanism for the theme change
+            this._buffer = buffer;
+            _snapshot = buffer.CurrentSnapshot;
+            _regions = new List<Region>();
+            ReParse();
+            this._buffer.Changed += BufferChanged; //use the same mechanism for the theme change
         }
 
         public IEnumerable<ITagSpan<IOutliningRegionTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             if (spans.Count == 0)
                 yield break;
-            List<Region> currentRegions = this.regions;
-            ITextSnapshot currentSnapshot = this.snapshot;
-            SnapshotSpan entire = new SnapshotSpan(spans[0].Start, spans[spans.Count - 1].End).TranslateTo(currentSnapshot, SpanTrackingMode.EdgeExclusive);
+            var currentRegions = _regions;
+            var currentSnapshot = _snapshot;
+            var entire = new SnapshotSpan(spans[0].Start, spans[spans.Count - 1].End).TranslateTo(currentSnapshot, SpanTrackingMode.EdgeExclusive);
             int startLineNumber = entire.Start.GetContainingLine().LineNumber;
             int endLineNumber = entire.End.GetContainingLine().LineNumber;
 
             foreach (var region in currentRegions)
             {
-                if (region.StartLine <= endLineNumber && region.EndLine >= startLineNumber)
+                if (region.StartLine > endLineNumber || region.EndLine < startLineNumber)
                 {
-                    var startLine = currentSnapshot.GetLineFromLineNumber(region.StartLine);
-                    var endLine = currentSnapshot.GetLineFromLineNumber(region.EndLine);
-
-                    //the region starts at the beginning of the "[", and goes until the *end* of the line that contains the "]".
-                    yield return new TagSpan<IOutliningRegionTag>(
-                        new SnapshotSpan(startLine.Start + region.StartOffset, endLine.End),
-                        new OutliningRegionTag(region.collapsed, false, region.ellipsis, region.ellipsis));
+                    continue;
                 }
+                var startLine = currentSnapshot.GetLineFromLineNumber(region.StartLine);
+                var endLine = currentSnapshot.GetLineFromLineNumber(region.EndLine);
+
+                //the region starts at the beginning of the "[", and goes until the *end* of the line that contains the "]".
+                yield return new TagSpan<IOutliningRegionTag>(
+                    new SnapshotSpan(startLine.Start + region.StartOffset, endLine.End),
+                    new OutliningRegionTag(region.collapsed, false, region.ellipsis, region.ellipsis));
             }
         }
 
         void BufferChanged(object sender, TextContentChangedEventArgs e)
         {
-            // If this isn't the most up-to-date version of the buffer, then ignore it for now 
+            // If this isn't the most up-to-date version of the _buffer, then ignore it for now 
             // (we'll eventually get another change event). 
-            if (e.After != buffer.CurrentSnapshot) return;
-            this.ReParse();
+            if (e.After != _buffer.CurrentSnapshot) return;
+            ReParse();
         }
 
         void ReParse()
         {
-            ITextSnapshot newSnapshot = buffer.CurrentSnapshot;
+            ITextSnapshot newSnapshot = _buffer.CurrentSnapshot;
             List<Region> newRegions = new List<Region>();
 
             //keep the current (deepest) partial region, which will have 
-            // references to any parent partial regions.
+            // references to any parent partial _regions.
             PartialRegion currentRegion = null;
             bool comment_started = false;
 
@@ -91,11 +92,16 @@ namespace NM_asm_highlight
 
                 string ellipsis_ = "";
                 string end_text_ = "";
+                string LabelName_ = "";
                 bool collapsed_ = false;
 
 
                 string current_line = linetext.Replace('\t', ' ');
                 current_line = current_line.TrimStart();
+
+                bool regionFinished_comment = false;
+
+                #region comment section
                 int comment_start = current_line.IndexOf("//", StringComparison.Ordinal);
                 if (comment_start == 0 && !comment_started)
                 {
@@ -105,201 +111,58 @@ namespace NM_asm_highlight
                     if (ellipsis_ == "")
                         ellipsis_ = "...";
                 }
-                bool regionFinished = false;
                 if(comment_start != 0 && comment_started)
                 {
-                    regionFinished = true;
+                    regionFinished_comment = true;
                 }
+                #endregion
 
-                if (regionStart > -1)
+                #region labels
+                bool regionFinished_label = false;
+                var label_values = current_line.Split(' ');
+                if (label_values.Length >= 2)
                 {
-                    int currentLevel = (currentRegion != null) ? currentRegion.Level : 1;
-                    int newLevel = currentLevel + 1;
-
-                    if (currentLevel == newLevel && currentRegion != null)
+                    bool labelFound = Dictionary_asm.Labels.Contains(label_values[0]);
+                    if (labelFound && label_values[0]!= "global")
                     {
-                        newRegions.Add(new Region()
+                        if (label_values[0] != "end")
                         {
-                            Level = currentRegion.Level,
-                            StartLine = currentRegion.StartLine,
-                            StartOffset = currentRegion.StartOffset,
-                            EndLine = line.LineNumber,
-                            ellipsis = ellipsis_,
-                            end_text = end_text_,
-                            collapsed = collapsed_
-                        });
-                        currentRegion = new PartialRegion()
+                            var a = 5;
+                            regionStart = current_line.IndexOf(label_values[0], StringComparison.Ordinal);
+                            ellipsis_ = label_values[1].Replace('\"', ' ').Trim();
+                            LabelName_ = ellipsis_;
+                        }
+                        else
                         {
-                            Level = newLevel,
-                            StartLine = line.LineNumber,
-                            StartOffset = regionStart,
-                            PartialParent = currentRegion.PartialParent,
-                            ellipsis = ellipsis_,
-                            end_text = end_text_,
-                            collapsed = collapsed_
-                        };
-                    }
-                    else
-                    {
-                        currentRegion = new PartialRegion()
-                        {
-                            Level = newLevel,
-                            StartLine = line.LineNumber,
-                            StartOffset = regionStart,
-                            PartialParent = currentRegion,
-                            ellipsis = ellipsis_,
-                            end_text = end_text_,
-                            collapsed = collapsed_
-                        };
-                    }
-                }
-                else if(regionFinished)
-                {
-                    int currentLevel = (currentRegion != null) ? currentRegion.Level : 1;
-                    regionStart = (currentRegion == null) ? -1 :
-                                            linetext.IndexOf(currentRegion.end_text, StringComparison.Ordinal);
-                    if (regionStart > -1)
-                    {
-                        int closingLevel = currentLevel; //! -1
-                        comment_started = false;
-
-                        if(currentRegion != null && currentLevel == closingLevel)
-                        {
-                            if ((line.LineNumber - currentRegion.StartLine) > 1) //check if comment is only one line
-                            {
-                                newRegions.Add(new Region()
-                                {
-                                    Level = currentLevel,
-                                    StartLine = currentRegion.StartLine,
-                                    StartOffset = currentRegion.StartOffset,
-                                    EndLine = line.LineNumber - 1,
-                                    ellipsis = currentRegion.ellipsis,
-                                    collapsed = currentRegion.collapsed
-                                });
-                                currentRegion = currentRegion.PartialParent;
-                            }
+                            regionFinished_label = true;
+                            LabelName_ = label_values[1].Replace('\"', ' ').Trim();
                         }
                     }
                 }
-#if false
-#if false
-                int regionStart = -1;
-                string linetext = line.GetText();
+                #endregion
 
-                string ellipsis_ = "";
-                string end_text_ = "";
-                bool collapsed_ = false;
-
-                regionStart = -1;
-                int collapsed_outlining_comment_start = linetext.IndexOf(";[+]", StringComparison.Ordinal);
-                int outlining_comment_start = linetext.IndexOf(";[", StringComparison.Ordinal);
-                int comment_start = linetext.IndexOf(";", StringComparison.Ordinal);
-                int proc_start = linetext.IndexOf("proc", StringComparison.OrdinalIgnoreCase);
-                int macro_start = linetext.IndexOf("macro", StringComparison.OrdinalIgnoreCase);
-                if (comment_start > -1)
+                #region closing the region
+                if (regionFinished_comment || regionFinished_label)
                 {
-                    if (comment_start < proc_start) proc_start = -1;
-                    if (comment_start < macro_start) macro_start = -1;
-                }
-#endif
-#if false
-                if (outlining_comment_start > -1 && collapsed_outlining_comment_start < 0)
-                {
-                    regionStart = outlining_comment_start;
-                    if (linetext.IndexOf(";[+") > -1)
+                    CloseRegion(newRegions, ref currentRegion, ref comment_started, line, linetext, LabelName_);
+                    if(regionFinished_comment && regionFinished_label)
                     {
-                        collapsed_ = true;
-                        ellipsis_ = linetext.Substring(outlining_comment_start + 3, -3 + linetext.Length - outlining_comment_start).Trim();
+                        CloseRegion(newRegions, ref currentRegion, ref comment_started, line, linetext, LabelName_);
                     }
-                    else
-                        ellipsis_ = linetext.Substring(outlining_comment_start + 2, -2 + linetext.Length - outlining_comment_start).Trim();
-                    end_text_ = ";]";
                 }
-                if (ellipsis_ == "") ellipsis_ = "..."; 
-#endif
-#if false
+                #endregion
+
+                #region opening the new region
                 if (regionStart > -1)
                 {
-                    int currentLevel = (currentRegion != null) ? currentRegion.Level : 1;
-                    int newLevel = currentLevel + 1;
-
-                    //levels are the same and we have an existing region; 
-                    //end the current region and start the next 
-                    if (currentLevel == newLevel && currentRegion != null)
-                    {
-                        // ???                     
-                        newRegions.Add(new Region()
-                        {
-                            Level = currentRegion.Level,
-                            StartLine = currentRegion.StartLine,
-                            StartOffset = currentRegion.StartOffset,
-                            EndLine = line.LineNumber,
-                            ellipsis = ellipsis_,
-                            end_text = end_text_,
-                            collapsed = collapsed_
-                        });
-                        currentRegion = new PartialRegion()
-                        {
-                            Level = newLevel,
-                            StartLine = line.LineNumber,
-                            StartOffset = regionStart,
-                            PartialParent = currentRegion.PartialParent,
-                            ellipsis = ellipsis_,
-                            end_text = end_text_,
-                            collapsed = collapsed_
-                        };
-                    }
-#endif
-#if false
-                //this is a new (sub)region 
-                    else
-                    {
-                        currentRegion = new PartialRegion()
-                        {
-                            Level = newLevel,
-                            StartLine = line.LineNumber,
-                            StartOffset = regionStart,
-                            PartialParent = currentRegion,
-                            ellipsis = ellipsis_,
-                            end_text = end_text_,
-                            collapsed = collapsed_
-                        };
-                    }
+                    currentRegion = OpenRegion(newRegions, currentRegion, line, regionStart, ellipsis_, end_text_, LabelName_, collapsed_);
                 }
-                //lines that contain ";]","endm","endp" denote the end of a region
-                else
-                {
-                    int currentLevel = (currentRegion != null) ? currentRegion.Level : 1;
-                    regionStart = (currentRegion == null) ? -1 :
-                        linetext.IndexOf(currentRegion.end_text, StringComparison.OrdinalIgnoreCase);
-                
-#endif
-                    if (regionStart > -1)
-                    {
-                        int closingLevel = currentLevel;
-
-                        //the regions match 
-                        if (currentRegion != null && currentLevel == closingLevel)
-                        {
-                            newRegions.Add(new Region()
-                            {
-                                Level = currentLevel,
-                                StartLine = currentRegion.StartLine,
-                                StartOffset = currentRegion.StartOffset,
-                                EndLine = line.LineNumber,
-                                ellipsis = currentRegion.ellipsis,
-                                collapsed = currentRegion.collapsed
-                            });
-                            currentRegion = currentRegion.PartialParent;
-                        }
-                    }
-                }
-#endif
+                #endregion
             }
 
             //determine the changed span, and send a changed event with the new spans
             List<Span> oldSpans =
-                new List<Span>(this.regions.Select(r => AsSnapshotSpan(r, this.snapshot)
+                new List<Span>(_regions.Select(r => AsSnapshotSpan(r, _snapshot)
                     .TranslateTo(newSnapshot, SpanTrackingMode.EdgeExclusive)
                     .Span));
             List<Span> newSpans =
@@ -308,7 +171,7 @@ namespace NM_asm_highlight
             NormalizedSpanCollection oldSpanCollection = new NormalizedSpanCollection(oldSpans);
             NormalizedSpanCollection newSpanCollection = new NormalizedSpanCollection(newSpans);
 
-            //the changed regions are regions that appear in one set or the other, but not both.
+            //the changed _regions are _regions that appear in one set or the other, but not both.
             NormalizedSpanCollection removed =
             NormalizedSpanCollection.Difference(oldSpanCollection, newSpanCollection);
 
@@ -327,15 +190,95 @@ namespace NM_asm_highlight
                 changeEnd = Math.Max(changeEnd, newSpans[newSpans.Count - 1].End);
             }
 
-            this.snapshot = newSnapshot;
-            this.regions = newRegions;
+            _snapshot = newSnapshot;
+            _regions = newRegions;
 
             if (changeStart <= changeEnd)
             {
-                ITextSnapshot snap = this.snapshot;
-                if (this.TagsChanged != null)
-                    this.TagsChanged(this, new SnapshotSpanEventArgs(
-                        new SnapshotSpan(this.snapshot, Span.FromBounds(changeStart, changeEnd))));
+                if (TagsChanged != null)
+                    TagsChanged(this, new SnapshotSpanEventArgs(
+                        new SnapshotSpan(_snapshot, Span.FromBounds(changeStart, changeEnd))));
+            }
+        }
+
+        private static PartialRegion OpenRegion(List<Region> newRegions, PartialRegion currentRegion, ITextSnapshotLine line, int regionStart, string ellipsis_, string end_text_, string LabelName_, bool collapsed_)
+        {
+            int currentLevel = (currentRegion != null) ? currentRegion.Level : 1;
+            int newLevel = currentLevel + 1;
+
+            if (currentLevel == newLevel && currentRegion != null)
+            {
+                newRegions.Add(new Region
+                {
+                    Level = currentRegion.Level,
+                    StartLine = currentRegion.StartLine,
+                    StartOffset = currentRegion.StartOffset,
+                    EndLine = line.LineNumber,
+                    ellipsis = ellipsis_,
+                    LabelName = LabelName_,
+                    end_text = end_text_,
+                    collapsed = collapsed_
+                });
+                currentRegion = new PartialRegion
+                {
+                    Level = newLevel,
+                    StartLine = line.LineNumber,
+                    StartOffset = regionStart,
+                    PartialParent = currentRegion.PartialParent,
+                    ellipsis = ellipsis_,
+                    LabelName = LabelName_,
+                    end_text = end_text_,
+                    collapsed = collapsed_
+                };
+            }
+            else
+            {
+                currentRegion = new PartialRegion
+                {
+                    Level = newLevel,
+                    StartLine = line.LineNumber,
+                    StartOffset = regionStart,
+                    PartialParent = currentRegion,
+                    ellipsis = ellipsis_,
+                    LabelName = LabelName_,
+                    end_text = end_text_,
+                    collapsed = collapsed_
+                };
+            }
+
+            return currentRegion;
+        }
+
+        private static void CloseRegion(List<Region> newRegions, ref PartialRegion currentRegion, ref bool comment_started, ITextSnapshotLine line, string linetext, string LabelName_)
+        {
+            int currentLevel = (currentRegion != null) ? currentRegion.Level : 1;
+            var currRegionStart = (currentRegion == null) ? -1 :
+                                    linetext.IndexOf(currentRegion.end_text, StringComparison.Ordinal);
+            if (currRegionStart > -1)
+            {
+                int closingLevel = currentLevel; //! -1
+                comment_started = false;
+
+                if (currentRegion != null && currentLevel == closingLevel)
+                {
+                    if ((line.LineNumber - currentRegion.StartLine) > 1) //check if comment is only one line
+                    {
+                        newRegions.Add(new Region
+                        {
+                            Level = currentLevel,
+                            StartLine = currentRegion.StartLine,
+                            StartOffset = currentRegion.StartOffset,
+                            EndLine = line.LineNumber - (LabelName_.Length > 0 ? 0 : 1),
+                            ellipsis = currentRegion.ellipsis,
+                            LabelName = currentRegion.LabelName,
+                            collapsed = currentRegion.collapsed
+                        });
+
+                        var tt = newRegions;
+
+                    }
+                    currentRegion = currentRegion.PartialParent;
+                }
             }
         }
 

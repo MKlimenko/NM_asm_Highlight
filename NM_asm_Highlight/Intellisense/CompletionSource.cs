@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
-using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Utilities;
-using System.Windows.Media.Imaging;
 
 namespace NM_asm_highlight
 {
@@ -22,26 +25,15 @@ namespace NM_asm_highlight
 
     class NMCompletionSource : ICompletionSource
     {
-        private ITextBuffer _buffer;
-        private bool _disposed = false;
-        private readonly IDictionary<NM_TokenTypes, System.Windows.Media.ImageSource> _icons;
+        private readonly ITextBuffer _buffer;
+        private bool _disposed;
+        private readonly IDictionary<NM_TokenTypes, ImageSource> _icons;
 
         public NMCompletionSource(ITextBuffer buffer)
         {
             _buffer = buffer;
-            this._icons = new Dictionary<NM_TokenTypes, System.Windows.Media.ImageSource>();
-            this.loadIcons();
-        }
-        
-        private string GetImageFullPath(string filename)
-        {
-            return System.IO.Path.Combine(
-                    //Get the location of your package dll
-                    System.Reflection.Assembly.GetExecutingAssembly().Location,
-                    //reference your 'images' folder
-                    "/images/",
-                    filename
-                 );
+            _icons = new Dictionary<NM_TokenTypes, ImageSource>();
+            loadIcons();
         }
 
         private string GetExplanation(string key)
@@ -59,31 +51,31 @@ namespace NM_asm_highlight
             if (_disposed)
                 throw new ObjectDisposedException("NMCompletionSource");
 
-            List<Completion> completions = new List<Completion>();
-            List<Tuple<string, System.Windows.Media.ImageSource>> completion_with_icons = new List<Tuple<string, System.Windows.Media.ImageSource>> ();
+            var completions = new List<Completion>();
+            var completionWithIcons = new List<Tuple<string, ImageSource>> ();
 
-            foreach (var el in NM_asm_highlight.Dictionary_asm.Keywords)
+            foreach (var el in Dictionary_asm.Keywords)
             {
-                completion_with_icons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_Keyword]));
+                completionWithIcons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_Keyword]));
             }
 
-            foreach (var el in NM_asm_highlight.Dictionary_asm.Directives)
+            foreach (var el in Dictionary_asm.Directives)
             {
-                completion_with_icons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_directive]));
+                completionWithIcons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_directive]));
             }
 
-            foreach (var el in NM_asm_highlight.Dictionary_asm.Labels)
+            foreach (var el in Dictionary_asm.Labels)
             {
-                completion_with_icons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_label]));
+                completionWithIcons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_label]));
             }
 
-            foreach (var el in NM_asm_highlight.Dictionary_asm.Data_registers)
+            foreach (var el in Dictionary_asm.Data_registers)
             {
-                completion_with_icons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_data_registers]));
+                completionWithIcons.Add(Tuple.Create(el, _icons[NM_TokenTypes.NM_data_registers]));
             }
 
-            completion_with_icons.Sort();
-            foreach(var el in completion_with_icons)
+            completionWithIcons.Sort();
+            foreach(var el in completionWithIcons)
             {
                 completions.Add(new Completion(el.Item1, el.Item1, GetExplanation(el.Item1), el.Item2, ""));
             }
@@ -120,7 +112,7 @@ namespace NM_asm_highlight
         {
             try
             {
-                string fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string fullPath = Assembly.GetExecutingAssembly().Location;
                 string filenameDll = "NM_asm_Highlight.dll";
                 return fullPath.Substring(0, fullPath.Length - filenameDll.Length);
             }
@@ -130,7 +122,7 @@ namespace NM_asm_highlight
             }
         }
 
-        private System.Windows.Media.ImageSource bitmapFromUri(Uri bitmapUri)
+        private ImageSource bitmapFromUri(Uri bitmapUri)
         {
             var bitmap = new BitmapImage();
             try
@@ -149,32 +141,32 @@ namespace NM_asm_highlight
 
         private void loadIcons()
         {
-            Uri uri = null;
+            Uri uri;
             string extension_path = getInstallPath();
             try
             {
                 uri = new Uri(extension_path + "images/Method_16x.png");
-                this._icons[NM_TokenTypes.NM_Keyword] = bitmapFromUri(uri);
+                _icons[NM_TokenTypes.NM_Keyword] = bitmapFromUri(uri);
             }
-            catch (System.IO.FileNotFoundException) { }
+            catch (FileNotFoundException) { }
             try
             {
                 uri = new Uri(extension_path + "images/Partition_16x.png");
-                this._icons[NM_TokenTypes.NM_directive] = bitmapFromUri(uri);
+                _icons[NM_TokenTypes.NM_directive] = bitmapFromUri(uri);
             }
-            catch (System.IO.FileNotFoundException) { }
+            catch (FileNotFoundException) { }
             try
             {
                 uri = new Uri(extension_path + "images/Component_16x.png");
-                this._icons[NM_TokenTypes.NM_label] = bitmapFromUri(uri);
+                _icons[NM_TokenTypes.NM_label] = bitmapFromUri(uri);
             }
-            catch (System.IO.FileNotFoundException) { }
+            catch (FileNotFoundException) { }
             try
             {
                 uri = new Uri(extension_path + "images/Structure_16x.png");
-                this._icons[NM_TokenTypes.NM_data_registers] = bitmapFromUri(uri);
+                _icons[NM_TokenTypes.NM_data_registers] = bitmapFromUri(uri);
             }
-            catch (System.IO.FileNotFoundException) { }
+            catch (FileNotFoundException) { }
         }
     }
 }

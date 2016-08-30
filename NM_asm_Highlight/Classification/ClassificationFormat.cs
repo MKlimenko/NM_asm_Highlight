@@ -15,7 +15,7 @@ namespace NM_asm_highlight
         Blue
     }
     
-    public class ThemeCheck
+    public static class ThemeCheck
     {
 
         private static readonly IDictionary<string, VsTheme> Themes = new Dictionary<string, VsTheme>()
@@ -40,11 +40,12 @@ namespace NM_asm_highlight
             return VsTheme.Unknown;
         }
 
-        public static string GetThemeId()
+        private static string GetThemeId()
         {
             string[] vstypes = { "14.0" }; //14 and higher
             //foreach (var el in vstypes)... //when VS2016(2017) will be released
-            string keyName = string.Format(@"Software\Microsoft\VisualStudio\{0}\ApplicationPrivateSettings\Microsoft\VisualStudio", vstypes[0]);
+            string keyName =
+                $@"Software\Microsoft\VisualStudio\{vstypes[0]}\ApplicationPrivateSettings\Microsoft\VisualStudio";
 
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey(keyName))
             {
@@ -63,17 +64,17 @@ namespace NM_asm_highlight
                 }
                 else
                 {
-                    keyName = string.Format(@"Software\Microsoft\VisualStudio\12.0\General");
+                    keyName = @"Software\Microsoft\VisualStudio\12.0\General";
                     using (RegistryKey key_12 = Registry.CurrentUser.OpenSubKey(keyName))
                     {
                         if (key_12 != null)
                         {
-                            string current_theme = (string)key_12.GetValue("CurrentTheme", string.Empty);
-                            if (!string.IsNullOrEmpty(current_theme))
+                            string currentTheme = (string)key_12.GetValue("CurrentTheme", string.Empty);
+                            if (!string.IsNullOrEmpty(currentTheme))
                             {
-                                if (current_theme.Length > 2)
+                                if (currentTheme.Length > 2)
                                 {
-                                    return current_theme.Substring(1, current_theme.Length - 2);
+                                    return currentTheme.Substring(1, currentTheme.Length - 2);
                                 }
                             }
                         }
@@ -99,8 +100,8 @@ namespace NM_asm_highlight
         public NM_asm_Keyword()
         {
             DisplayName = "NM asm Keyword";
-            var current_theme = ThemeCheck.GetCurrentTheme();
-            if (current_theme.ToString().ToLower() == "dark")
+            var currentTheme = ThemeCheck.GetCurrentTheme();
+            if (currentTheme.ToString().ToLower() == "dark")
             {
                 ForegroundColor = (Color)ColorConverter.ConvertFromString("#569cd6");
             }
@@ -120,8 +121,9 @@ namespace NM_asm_highlight
     {
         public NM_asm_Directive()
         {
-            DisplayName = "NM asm Directive"; var current_theme = ThemeCheck.GetCurrentTheme();
-            if (current_theme.ToString().ToLower() == "dark")
+            DisplayName = "NM asm Directive";
+            var currentTheme = ThemeCheck.GetCurrentTheme();
+            if (currentTheme.ToString().ToLower() == "dark")
             {
                 //Dark coloring
                 ForegroundColor = (Color)ColorConverter.ConvertFromString("#49c6ad");
@@ -143,8 +145,8 @@ namespace NM_asm_highlight
         public NM_asm_Label()
         {
             DisplayName = "NM asm Label";
-            var current_theme = ThemeCheck.GetCurrentTheme();
-            if (current_theme.ToString().ToLower() == "dark")
+            var currentTheme = ThemeCheck.GetCurrentTheme();
+            if (currentTheme.ToString().ToLower() == "dark")
             {
                 //Dark coloring
                 ForegroundColor = (Color)ColorConverter.ConvertFromString("#b572e3");
@@ -166,8 +168,8 @@ namespace NM_asm_highlight
         public NM_asm_Data_registers()
         {
             DisplayName = "NM asm Data Registers";
-            var current_theme = ThemeCheck.GetCurrentTheme();
-            if (current_theme.ToString().ToLower() == "dark")
+            var currentTheme = ThemeCheck.GetCurrentTheme();
+            if (currentTheme.ToString().ToLower() == "dark")
             {
                 //Dark coloring
                 ForegroundColor = Colors.DarkCyan;
@@ -189,8 +191,8 @@ namespace NM_asm_highlight
         public NM_asm_Comment()
         {
             DisplayName = "NM asm Comment";
-            var current_theme = ThemeCheck.GetCurrentTheme();
-            if (current_theme.ToString().ToLower() == "dark")
+            var currentTheme = ThemeCheck.GetCurrentTheme();
+            if (currentTheme.ToString().ToLower() == "dark")
             {
                 //Dark coloring
                 ForegroundColor = (Color)ColorConverter.ConvertFromString("#51a448");
@@ -212,8 +214,8 @@ namespace NM_asm_highlight
         public NM_asm_Quote()
         {
             DisplayName = "NM asm Quote";
-            var current_theme = ThemeCheck.GetCurrentTheme();
-            if (current_theme.ToString().ToLower() == "dark")
+            var currentTheme = ThemeCheck.GetCurrentTheme();
+            if (currentTheme.ToString().ToLower() == "dark")
             {
                 //Dark coloring
                 ForegroundColor = (Color)ColorConverter.ConvertFromString("#d39670");
@@ -235,8 +237,8 @@ namespace NM_asm_highlight
         public NM_asm_Number()
         {
             DisplayName = "NM asm Number";
-            var current_theme = ThemeCheck.GetCurrentTheme();
-            if (current_theme.ToString().ToLower() == "dark")
+            var currentTheme = ThemeCheck.GetCurrentTheme();
+            if (currentTheme.ToString().ToLower() == "dark")
             {
                 //Dark coloring
                 ForegroundColor = (Color)ColorConverter.ConvertFromString("#b5cea8");
@@ -258,9 +260,8 @@ namespace NM_asm_highlight
         public NM_asm_Custom_Label()
         {
             DisplayName = "NM asm custom label";
-            //   ForegroundColor = Colors.DarkRed; 
-            var current_theme = ThemeCheck.GetCurrentTheme();
-            if (current_theme.ToString().ToLower() == "dark")
+            var currentTheme = ThemeCheck.GetCurrentTheme();
+            if (currentTheme.ToString().ToLower() == "dark")
             {
                 //Dark coloring
                 ForegroundColor = (Color)ColorConverter.ConvertFromString("#d37941");
@@ -269,6 +270,20 @@ namespace NM_asm_highlight
             {
                 ForegroundColor = (Color)ColorConverter.ConvertFromString("#d52828");
             }
+        }
+    }
+
+    [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = "nm_asm_macro")]
+    [Name("nm_asm_macro")]
+    [UserVisible(false)]
+    [Order(Before = Priority.Default)]
+    internal sealed class NM_asm_Macro : ClassificationFormatDefinition
+    {
+        public NM_asm_Macro()
+        {
+            DisplayName = "NM asm macro";
+                ForegroundColor = (Color)ColorConverter.ConvertFromString("#d52888"); //revise!
         }
     }
     #endregion //Format definition

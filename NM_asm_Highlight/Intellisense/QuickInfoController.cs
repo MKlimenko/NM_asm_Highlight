@@ -9,13 +9,10 @@
 //
 //***************************************************************************
 
-using System;
 using System.Collections.Generic;
-using System.Windows.Input;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Utilities;
 
 namespace VSLTK.Intellisense
 {
@@ -26,8 +23,8 @@ namespace VSLTK.Intellisense
         #region Private Data Members
 
         private ITextView _textView;
-        private IList<ITextBuffer> _subjectBuffers;
-        private TemplateQuickInfoControllerProvider _componentContext;
+        private readonly IList<ITextBuffer> _subjectBuffers;
+        private readonly TemplateQuickInfoControllerProvider _componentContext;
 
         private IQuickInfoSession _session;
 

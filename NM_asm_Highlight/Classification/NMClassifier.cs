@@ -5,7 +5,6 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
 
@@ -37,35 +36,35 @@
             ITagAggregator<NM_TokenTag> NMTagAggregator = 
                                             aggregatorFactory.CreateTagAggregator<NM_TokenTag>(buffer);
 
-            return new NMClassifier(buffer, NMTagAggregator, ClassificationTypeRegistry) as ITagger<T>;
+            return new NMClassifier(NMTagAggregator, ClassificationTypeRegistry) as ITagger<T>;
         }
     }
 
     internal sealed class NMClassifier : ITagger<ClassificationTag>
     {
-        ITextBuffer _buffer;
-        ITagAggregator<NM_TokenTag> _aggregator;
-        IDictionary<NM_TokenTypes, IClassificationType> _NM_Types;
+        readonly ITagAggregator<NM_TokenTag> _aggregator;
+        readonly IDictionary<NM_TokenTypes, IClassificationType> _NM_Types;
   
         /// <summary>
         /// Construct the classifier and define search tokens
         /// </summary>
-        internal NMClassifier(ITextBuffer buffer, 
-                               ITagAggregator<NM_TokenTag> NMTagAggregator, 
+        internal NMClassifier(ITagAggregator<NM_TokenTag> NMTagAggregator, 
                                IClassificationTypeRegistryService typeService)
         {
-            _buffer = buffer;
             _aggregator = NMTagAggregator;
-            _NM_Types = new Dictionary<NM_TokenTypes, IClassificationType>();
+            _NM_Types = new Dictionary<NM_TokenTypes, IClassificationType>
+            {
+                [NM_TokenTypes.NM_Keyword] = typeService.GetClassificationType("nm_asm_keyword"),
+                [NM_TokenTypes.NM_directive] = typeService.GetClassificationType("nm_asm_directive"),
+                [NM_TokenTypes.NM_label] = typeService.GetClassificationType("nm_asm_label"),
+                [NM_TokenTypes.NM_data_registers] = typeService.GetClassificationType("nm_asm_data_registers"),
+                [NM_TokenTypes.NM_comment] = typeService.GetClassificationType("nm_asm_comment"),
+                [NM_TokenTypes.NM_quote] = typeService.GetClassificationType("nm_asm_quote"),
+                [NM_TokenTypes.NM_number] = typeService.GetClassificationType("nm_asm_number"),
+                [NM_TokenTypes.NM_custom_label] = typeService.GetClassificationType("nm_asm_custom_label"),
+                [NM_TokenTypes.NM_Macro] = typeService.GetClassificationType("nm_asm_macro")
+            };
 
-            _NM_Types[NM_TokenTypes.NM_Keyword] = typeService.GetClassificationType("nm_asm_keyword");
-            _NM_Types[NM_TokenTypes.NM_directive] = typeService.GetClassificationType("nm_asm_directive");
-            _NM_Types[NM_TokenTypes.NM_label] = typeService.GetClassificationType("nm_asm_label");
-            _NM_Types[NM_TokenTypes.NM_data_registers] = typeService.GetClassificationType("nm_asm_data_registers");
-            _NM_Types[NM_TokenTypes.NM_comment] = typeService.GetClassificationType("nm_asm_comment");
-            _NM_Types[NM_TokenTypes.NM_quote] = typeService.GetClassificationType("nm_asm_quote");
-            _NM_Types[NM_TokenTypes.NM_number] = typeService.GetClassificationType("nm_asm_number");
-            _NM_Types[NM_TokenTypes.NM_custom_label] = typeService.GetClassificationType("nm_asm_custom_label");
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged

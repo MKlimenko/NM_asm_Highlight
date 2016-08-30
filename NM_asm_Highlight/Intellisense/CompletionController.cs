@@ -51,9 +51,9 @@ namespace NM_asm_highlight
             Broker = broker;
         }
 
-        public IWpfTextView TextView { get; private set; }
-        public ICompletionBroker Broker { get; private set; }
-        public IOleCommandTarget Next { get; set; }
+        private IWpfTextView TextView { get; }
+        private ICompletionBroker Broker { get; }
+        public IOleCommandTarget Next { private get; set; }
 
         private char GetTypeChar(IntPtr pvaIn)
         {
@@ -127,7 +127,6 @@ namespace NM_asm_highlight
                             {
                                 prev_space = true;
                                 Cancel();
-                                break;
                             }
                             else if (_currentSession != null)
                             {
@@ -146,8 +145,6 @@ namespace NM_asm_highlight
                                 prev_space = true;
                                 break;
                             }
-                        default:
-                            break;
                     }
                 }
             }

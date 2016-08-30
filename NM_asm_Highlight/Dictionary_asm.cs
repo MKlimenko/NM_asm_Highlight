@@ -2,10 +2,10 @@
 
 namespace NM_asm_highlight
 {
-    class Dictionary_asm
+    static class Dictionary_asm
     {
         #region Keywords
-        public static List<string> Keywords = new List<string>(new string[]
+        public static readonly List<string> Keywords = new List<string>(new[]
         {
             "activate",
             "addr",
@@ -20,7 +20,6 @@ namespace NM_asm_highlight
             "common",
             "const",
             "ctrue",
-            "data",
             "delayed",
             "double",
             "dup",
@@ -36,7 +35,6 @@ namespace NM_asm_highlight
             "ireturn",
             "loword",
             "mask",
-            "nobits",
             "noflags",
             "not",
             "nul",
@@ -69,10 +67,12 @@ namespace NM_asm_highlight
         #endregion
 
         #region Directives 
-        public static List<string> Directives = new List<string>(new string[]
+        public static readonly List<string> Directives = new List<string>(new[]
         {
             ".align",
             ".branch",
+            ".if",
+            ".endif",
             ".wait",
             ".repeat",
             ".endrepeat"
@@ -80,23 +80,25 @@ namespace NM_asm_highlight
         #endregion
 
         #region Labels 
-        public static List<string> Labels = new List<string>(new string[]
+        public static readonly List<string> Labels = new List<string>(new[]
         {
             "begin",
-            "local",
+            "data",
+            "end",
+            "extern",
+            "from",
             "global",
             "import",
-            "from",
-            "struct",
-            "end",
             "label",
+            "local",
             "macro",
-            "extern",
+            "nobits",
+            "struct"
         });
         #endregion
 
         #region Data_registers 
-        public static List<string> Data_registers = new List<string>(new string[]
+        public static readonly List<string> Data_registers = new List<string>(new[]
         {
             "ar0",
             "ar1",
@@ -158,10 +160,9 @@ namespace NM_asm_highlight
         #endregion
 
         #region Auxiliary_symbols 
-        public static char[] auxiliary_symbols = new char[]
+
+        private static readonly char[] auxiliary_symbols = new[]
         {
-            '(',
-            ')',
             ',',
             ';',
             '+',
@@ -174,9 +175,9 @@ namespace NM_asm_highlight
         #endregion
 
         #region assisting_methods
-        public static string RemoveAux(string src, ref int start, ref int finish)
+        public static string RemoveAux(string src, out int start, out int finish)
         {
-            string dst = src;
+            var dst = src;
             foreach (var el in auxiliary_symbols)
             {
                 dst = dst.Replace(el, ' ');
@@ -203,11 +204,12 @@ namespace NM_asm_highlight
 
         public static bool IsComment(string src)
         {
-            if (src.Length < 2)
+            var tmp_str = src.Replace('\t', ' ').Trim();
+            if (tmp_str.Length < 2)
             {
                 return false;
             }
-            else if (src[0] == '/' && src[1] == '/')
+            else if (tmp_str[0] == '/' && tmp_str[1] == '/')
             {
                 return true;
             }
@@ -231,7 +233,7 @@ namespace NM_asm_highlight
 
         public static bool IsNumber(string src)
         { 
-            long number = 0;
+            long number;
             bool res = long.TryParse(src, out number);
             if (res)
                 return true;
@@ -279,6 +281,32 @@ namespace NM_asm_highlight
             {
                 return true;
             }
+            return false;
+        }
+
+        public static List<string> Macros = new List<string>();
+
+        public static void AddMacro(string src_Line)
+        {
+            var words = src_Line.Split(' ');
+            if (words[0].ToLower() == "macro")
+            {
+                var getmacro = words[1].Replace('(', ' ').Split(' ');
+                if (!Macros.Contains(getmacro[0].ToLower()))
+                {
+                    Macros.Add(getmacro[0].ToLower());
+                }
+            }
+        }
+
+        public static bool IsMacro(string src, out int size)
+        {
+            var tmp = src.Replace('(', ' ').Split(' ');
+            if (Macros.Contains(tmp[0].ToLower())){
+                size = tmp[0].Length;
+                return true;
+            }
+            size = 0;
             return false;
         }
         #endregion

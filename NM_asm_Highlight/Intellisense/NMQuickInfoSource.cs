@@ -35,9 +35,9 @@ namespace NM_asm_highlight
     /// </summary>
     class NMQuickInfoSource : IQuickInfoSource
     {
-        private ITagAggregator<NM_TokenTag> _aggregator;
-        private ITextBuffer _buffer;
-        private bool _disposed = false;
+        private readonly ITagAggregator<NM_TokenTag> _aggregator;
+        private readonly ITextBuffer _buffer;
+        private bool _disposed;
 
         public NMQuickInfoSource(ITextBuffer buffer, ITagAggregator<NM_TokenTag> aggregator)
         {

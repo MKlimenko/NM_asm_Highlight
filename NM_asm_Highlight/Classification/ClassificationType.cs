@@ -39,6 +39,10 @@ namespace NM_asm_highlight
         [Export(typeof(ClassificationTypeDefinition))]
         [Name("nm_asm_custom_label")]
         internal static ClassificationTypeDefinition NM_asm_Custom_Label = null;
+
+        [Export(typeof(ClassificationTypeDefinition))]
+        [Name("nm_asm_macro")]
+        internal static ClassificationTypeDefinition NM_asm_Macro = null;
         #endregion
     }
 }
