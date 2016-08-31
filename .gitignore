@@ -16,7 +16,6 @@ Thumbs.db
 *.tlb
 *.tlh
 *.dll
-*.vsixmanifest
 *.bak
 *.cache
 *.ilk
