@@ -10,11 +10,13 @@
 //***************************************************************************-->
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
   <Metadata>
-    <Identity Id="eedb1085-e09d-4934-a0ab-77262b6b19c6" Version="0.3.2" Language="en-US" Publisher="RC Module" />
+    <Identity Id="eedb1085-e09d-4934-a0ab-77262b6b19c6" Version="0.3.3" Language="en-US" Publisher="RC Module" />
     <DisplayName>NeuroMatrix assembly language</DisplayName>
     <Description xml:space="preserve">NeuroMatrix assembly language syntax highlight and statement completion</Description>
     <License>License.txt</License>
     <ReleaseNotes>Changelog.txt</ReleaseNotes>
+    <Icon>logo.png</Icon>
+    <PreviewImage>logo.png</PreviewImage>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="14.0" />

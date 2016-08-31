@@ -127,7 +127,6 @@ namespace NM_asm_highlight
                     {
                         if (label_values[0] != "end")
                         {
-                            var a = 5;
                             regionStart = current_line.IndexOf(label_values[0], StringComparison.Ordinal);
                             ellipsis_ = label_values[1].Replace('\"', ' ').Trim();
                             LabelName_ = ellipsis_;
